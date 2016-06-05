@@ -8,14 +8,12 @@ If you first highlight arbitrary text or visual elements, you can then middle cl
 #### How?
 This program assumes that the key combinations Cmd+C/Cmd+V are mapped as copy and paste in your applications. If they are not, then this will not work, because the program simply posts the following events: 
 
-1. Cmd+C down & up (copies your selected text or objects)
-2. Left Mouse Button down & up (gives focus to the window under your current mouse position)
-3. Cmd+V down & up (pastes at current mouse position)
+1. Cmd+C down & up (copies your selected text or objects) whenever your left mouse button releases.
+   This allows copying text that is drag highlighted, or double-clicked to highlight words or lines.
+2. Left Mouse Button down & up (position mouse cursor for paste insertion) on middle click.
+3. Cmd+V down & up after tiny delay following middle click.
 
 If your mouse is left-handed, or you remapped the keystrokes, then just edit the C program and recompile.
-
-#### Limitations
-If you left click a window, such as the target window, before middle clicking, then focus will be lost from the source and this feature will not work. An alternative mode is in development to circumvent this by monitoring mouse drags and double clicks, which will trigger a copy immediately instead of delaying copy.
 
 ## Usage
 Run the executable in the background from your shell command-line interface, or run it as a "Login Item" at startup (System Preferences > Users & Groups > Login Items > + > Navigate to file).
@@ -23,6 +21,10 @@ Run the executable in the background from your shell command-line interface, or 
 ## Building
 
 	make macpaste
+
+## Running
+
+    ./macpaste &
 
 ## License
 Public Domain 2016
