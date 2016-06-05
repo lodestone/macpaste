@@ -1,4 +1,4 @@
-MacPaste - The Missing Mouse Paste Feature for Mac OSX
+# MacPaste - The Missing Mouse Paste Feature for Mac OSX
 
 ## Overview
 This simulates the middle mouse button copy/paste found in Unix/Linux X11 window managers.
