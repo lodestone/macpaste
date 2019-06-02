@@ -93,10 +93,12 @@ static CGEventRef mouseCallback (
     CGEventRef event,
     void * refcon
 ) {
+	int* dontpaste = refcon;
 	switch ( type )
 	{
 		case kCGEventOtherMouseDown:
-			paste( event );
+			if (*dontpaste == 0)		
+				paste( event );
 			break;
 
 		case kCGEventLeftMouseDown:
@@ -130,7 +132,18 @@ int main (
     CFMachPortRef myEventTap;
     CFRunLoopSourceRef eventTapRLSrc;
 
-	printf("Quit from command-line foreground with Ctrl+C\n");
+    // parse args for -n flag
+    int c;
+    int dontpaste = 0;
+    while ((c = getopt (argc, argv, "n")) != -1)
+      switch (c)
+      {
+      case 'n':
+        dontpaste = 1;
+        break;
+      default:
+        break;
+       }
 
     // We want "other" mouse button click-release, such as middle or exotic.
     emask = CGEventMaskBit( kCGEventOtherMouseDown )  |
@@ -145,7 +158,7 @@ int main (
         kCGEventTapOptionListenOnly, // We only listen, we don't modify
         emask,
         & mouseCallback,
-        NULL                         // We need no extra data in the callback
+        & dontpaste                   // dontpaste -> callback
     );
 
     // Create a RunLoop Source for it
