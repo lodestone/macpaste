@@ -6,7 +6,7 @@ This program simulates the middle mouse button copy/paste found in Unix/Linux X1
 
 ## Installation
 
-I've created `setup.sh` to take care of most of the integration into MacOS.
+The script `setup.sh` takes care of most of the integration into MacOS.
 
 * If you have a three-button mouse, run `./setup.sh`. You will have copy and paste right away.
 * If not (e.g. Trackpad, MagicMouse etc), run `./setup.sh -n`. This will create the copy, but not the paste action. See below for ways to mimic the middle-click paste.
@@ -24,7 +24,7 @@ Alternatively, log out and log in again.
 
 ## The elusive middle button
 
-My solution to work with stock Mac Trackpad and MagicMouse, which lack an explicit middle button, uses [BetterTouchTool](https://folivora.ai/) (BTT). If you don't have it yet, it has a trial version but it'll require a (rather cheap) license if you want to keep it for longer.
+One solution to work with stock Apple Trackpad and MagicMouse, which lack an explicit middle button, uses [BetterTouchTool](https://folivora.ai/) (BTT). If you don't have it yet, it has a trial version but it'll require a (rather cheap) license if you want to keep it for longer.
 
 BTT has a much wider range of events and actions than the default MacOS, specifically it has a `1-Finger Middle Click` for the MagicMouse, but not for the Trackpad. To have both behave in the same way, I chose `1-Finger Tap Middle` (MagicMouse) and `1-Finger Tap Bottom Middle` (Trackpad) as the triggers. You do you.
 
