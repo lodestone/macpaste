@@ -32,7 +32,7 @@ In detail, the script
 * compiles the C binary and puts it into `$HOME/bin`
 * creates a LaunchAgent `plist` file and puts it into `$HOME/Library/LaunchAgents/`
 
-Then **you have to** open `System Preferences -> Security & Privacy -> Privacy` and add `$HOME/bin/macpaste` to allow the program to listen to system events.  
+Next, in your terminal run `~/bin/macpaste` to run the program.  This should prompt you to open System Preferences and give access to terminal.
 
 If you want to test the installation, make sure your terminal is also listed in the `Privacy` list, and then run `launchctl load $HOME/Library/LaunchAgents/local.macpaste.plist` for the terminal.
 
