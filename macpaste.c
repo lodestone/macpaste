@@ -94,11 +94,13 @@ static void paste(CGEventRef event) {
       void * refcon
     ) {
       int* dontpaste = refcon;
+      int button;
       switch ( type )
       {
         case kCGEventOtherMouseDown:
-        if (*dontpaste == 0)
-        paste( event );
+        button = CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber);
+        if (*dontpaste == 0 && button == 2)
+          paste( event );
         break;
 
         case kCGEventLeftMouseDown:
