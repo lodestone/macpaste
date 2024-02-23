@@ -17,6 +17,7 @@
 #include <ApplicationServices/ApplicationServices.h>
 #include <Carbon/Carbon.h> // kVK_ANSI_*
 #include <sys/time.h> // gettimeofday
+#include <AppKit/NSCursor.h>
 
 char isDragging = 0;
 long long prevClickTime = 0;
@@ -25,7 +26,7 @@ long long curClickTime = 0;
 CGEventTapLocation tapA = kCGAnnotatedSessionEventTap;
 CGEventTapLocation tapH = kCGHIDEventTap;
 
-#define DOUBLE_CLICK_MILLIS 500
+#define DOUBLE_CLICK_MILLIS 200
 
 long long now() {
   struct timeval te;
@@ -99,7 +100,9 @@ static void paste(CGEventRef event) {
       {
         case kCGEventOtherMouseDown:
         button = CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber);
-        if (*dontpaste == 0 && button == 2)
+        NSCursor* cursor = [NSCursor currentSystemCursor];
+        NSCursor* ibeam = [NSCursor IBeamCursor];
+        if (*dontpaste == 0 && button == 2 && NSEqualPoints([cursor hotSpot] , [ibeam hotSpot] ))
           paste( event );
         break;
 
@@ -134,6 +137,7 @@ static void paste(CGEventRef event) {
       CFMachPortRef myEventTap;
       CFRunLoopSourceRef eventTapRLSrc;
 
+
       // parse args for -n flag
       int c;
       int dontpaste = 0;
@@ -152,6 +156,7 @@ static void paste(CGEventRef event) {
       CGEventMaskBit( kCGEventLeftMouseDown ) |
       CGEventMaskBit( kCGEventLeftMouseUp )   |
       CGEventMaskBit( kCGEventLeftMouseDragged );
+      NSApplicationLoad();
 
       // Create the Tap
       myEventTap = CGEventTapCreate (
