@@ -22,6 +22,7 @@
 char isDragging = 0;
 long long prevClickTime = 0;
 long long curClickTime = 0;
+NSPoint initialLocation;
 
 CGEventTapLocation tapA = kCGAnnotatedSessionEventTap;
 CGEventTapLocation tapH = kCGHIDEventTap;
@@ -102,22 +103,38 @@ static void paste(CGEventRef event) {
         button = CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber);
         NSCursor* cursor = [NSCursor currentSystemCursor];
         NSCursor* ibeam = [NSCursor IBeamCursor];
-        if (*dontpaste == 0 && button == 2 && NSEqualPoints([cursor hotSpot] , [ibeam hotSpot] ))
+        if (*dontpaste == 0 && button == 2 && NSEqualPoints([cursor hotSpot] , [ibeam hotSpot] )) {
+        // NSLog(@"paste %@", NSStringFromPoint( [NSEvent mouseLocation]));
           paste( event );
+        }
         break;
 
         case kCGEventLeftMouseDown:
+        //NSLog(@"down %@", NSStringFromPoint( [NSEvent mouseLocation]));
         recordClickTime();
         break;
 
         case kCGEventLeftMouseUp:
-        if ( isDoubleClick() || isDragging ) {
+        //NSLog(@"up %@", NSStringFromPoint( [NSEvent mouseLocation]));
+        if (isDoubleClick()) {
+        //NSLog(@"copydblc %@", NSStringFromPoint( [NSEvent mouseLocation]));
           copy();
+        }
+        if (isDragging) {
+            NSPoint clickLocation = [NSEvent mouseLocation];
+            int xdiff = fabs(initialLocation.x-clickLocation.x);
+            int ydiff = fabs(initialLocation.y-clickLocation.y);
+            if (xdiff > 5 || ydiff > 5) {
+        //NSLog(@"copydrag %@ %@", NSStringFromPoint(initialLocation), NSStringFromPoint( [NSEvent mouseLocation]));
+               copy();
+            }
         }
         isDragging = 0;
         break;
 
         case kCGEventLeftMouseDragged:
+        if (!isDragging)
+            initialLocation = [NSEvent mouseLocation];
         isDragging = 1;
         break;
 
