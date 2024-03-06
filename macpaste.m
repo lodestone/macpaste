@@ -20,10 +20,22 @@
 #include <AppKit/NSCursor.h>
 
 char isDragging = 0;
+long long prevPrevClickTime = 0;
+long long prevClickTime = 0;
+long long curClickTime = 0;
 NSPoint initialLocation;
 
 CGEventTapLocation tapA = kCGAnnotatedSessionEventTap;
 CGEventTapLocation tapH = kCGHIDEventTap;
+
+#define TRIPLE_CLICK_MILLIS 500
+
+long long now() {
+  struct timeval te;
+  gettimeofday( & te, NULL );
+  long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // caculate milliseconds
+  return milliseconds;
+}
 
 static void paste(CGEventRef event) {
   // Mouse click to focus and position insertion cursor.
@@ -65,6 +77,16 @@ static void paste(CGEventRef event) {
       CFRelease( source );
     }
 
+    static void recordClickTime() {
+      prevPrevClickTime = prevClickTime;
+      prevClickTime = curClickTime;
+      curClickTime = now();
+    }
+
+    static char isTripleClick() {
+      return ( curClickTime - prevPrevClickTime ) < TRIPLE_CLICK_MILLIS;
+    }
+
     static CGEventRef mouseCallback (
       CGEventTapProxy proxy,
       CGEventType type,
@@ -85,8 +107,17 @@ static void paste(CGEventRef event) {
         }
         break;
 
+        case kCGEventLeftMouseDown:
+        //NSLog(@"down %@", NSStringFromPoint( [NSEvent mouseLocation]));
+        recordClickTime();
+        break;
+
         case kCGEventLeftMouseUp:
         //NSLog(@"up %@", NSStringFromPoint( [NSEvent mouseLocation]));
+        if (isTripleClick()) {
+        NSLog(@"copytrlc %@", NSStringFromPoint( [NSEvent mouseLocation]));
+          copy();
+        }
         if (isDragging) {
             NSPoint clickLocation = [NSEvent mouseLocation];
             int xdiff = fabs(initialLocation.x-clickLocation.x);
