@@ -8,8 +8,8 @@ help:
 clean:
 	-rm -f macpaste
 
-macpaste: macpaste.c
-	gcc -O2 -framework ApplicationServices -o macpaste macpaste.c
+macpaste: macpaste.m
+	gcc -O2 -framework AppKit -framework ApplicationServices -o macpaste macpaste.m
 
 run:
 	./macpaste
