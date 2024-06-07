@@ -22,6 +22,7 @@
 #include <sys/time.h>      // gettimeofday
 
 char isDragging = 0;
+char debug = 0;
 long long prevPrevClickTime = 0;
 long long prevClickTime = 0;
 long long curClickTime = 0;
@@ -61,22 +62,24 @@ static NSMutableArray *copy_paste_items(NSArray *items) {
 }
 
 static void logInfo(NSString *location) {
-  // NSString *pinfo = NULL;
-  // NSString *linfo = NULL;
-  // NSString *cinfo = NULL;
-  // if (pasteItems != NULL && [pasteItems count]) {
-  //   pinfo = [pasteItems[0] stringForType:NSPasteboardTypeString];
-  // }
-  // if (lastClipItems != NULL && [lastClipItems count]) {
-  //   linfo = [lastClipItems[0] stringForType:NSPasteboardTypeString];
-  // }
-  // if ([[[NSPasteboard generalPasteboard] pasteboardItems] count]) {
-  //   cinfo = [[[NSPasteboard generalPasteboard] pasteboardItems][0]
-  //       stringForType:NSPasteboardTypeString];
-  // }
-  // NSLog(@"%@: %ld\npaste: %@\nlastclip %@\nactual clip: %@ (%ld)", location,
-  //       lastTouchedCount, pinfo, linfo, cinfo, [[NSPasteboard
-  //       generalPasteboard] changeCount]);
+  if (debug) {
+    NSString *pinfo = NULL;
+    NSString *linfo = NULL;
+    NSString *cinfo = NULL;
+    if (pasteItems != NULL && [pasteItems count]) {
+      pinfo = [pasteItems[0] stringForType:NSPasteboardTypeString];
+    }
+    if (lastClipItems != NULL && [lastClipItems count]) {
+      linfo = [lastClipItems[0] stringForType:NSPasteboardTypeString];
+    }
+    if ([[[NSPasteboard generalPasteboard] pasteboardItems] count]) {
+      cinfo = [[[NSPasteboard generalPasteboard] pasteboardItems][0]
+          stringForType:NSPasteboardTypeString];
+    }
+    NSLog(@"%@: %ld\npaste: %@\nlastclip %@ (%ld)\nactual clip: %@ (%ld)", location,
+          lastTouchedCount, pinfo, linfo, lastClipCount, cinfo, [[NSPasteboard
+          generalPasteboard] changeCount]);
+  }
 }
 
 static void paste(CGEventRef event) {
@@ -130,7 +133,7 @@ static void paste(CGEventRef event) {
 static void copy() {
   NSPasteboard *pb = [NSPasteboard generalPasteboard];
   lastClipCount = [pb changeCount];
-  lastClipItems = copy_paste_items([pb pasteboardItems]);
+  //lastClipItems = copy_paste_items([pb pasteboardItems]);
   // NSLog(@"SET LCI %@", [lastClipItems[0]
   // stringForType:NSPasteboardTypeString]);
   CGEventSourceRef source =
@@ -138,8 +141,8 @@ static void copy() {
   CGEventRef kbdEventDown = CGEventCreateKeyboardEvent(source, kVK_ANSI_C, 1);
   CGEventRef kbdEventUp = CGEventCreateKeyboardEvent(source, kVK_ANSI_C, 0);
   CGEventSetFlags(kbdEventDown, kCGEventFlagMaskCommand);
-  CGEventPost(tapA, kbdEventDown);
-  CGEventPost(tapA, kbdEventUp);
+  CGEventPost(tapH, kbdEventDown);
+  CGEventPost(tapH, kbdEventUp);
   CFRelease(kbdEventDown);
   CFRelease(kbdEventUp);
   CFRelease(source);
@@ -173,19 +176,20 @@ static CGEventRef mouseCallback(CGEventTapProxy proxy, CGEventType type,
         [pasteItems release];
       }
       pasteItems = copy_paste_items([pb pasteboardItems]);
+      lastTouchedCount = [pb changeCount];
 
       // NSLog(@"WRITING %@ to clip in first step, set %@ to selection",
       //       [lastClipItems[0] stringForType:NSPasteboardTypeString],
       //       [pasteItems[0] stringForType:NSPasteboardTypeString]);
-      logInfo(@"before restore");
-      [pb clearContents];
-      [pb writeObjects:lastClipItems];
-      lastTouchedCount = [pb changeCount];
-      NSMutableArray *newLastClipItems = copy_paste_items(lastClipItems);
-      [lastClipItems release];
-      lastClipItems = newLastClipItems;
+      // logInfo(@"before restore");
+      // [pb clearContents];
+      // [pb writeObjects:lastClipItems];
+      // lastTouchedCount = [pb changeCount];
+      // NSMutableArray *newLastClipItems = copy_paste_items(lastClipItems);
+      // [lastClipItems release];
+      // lastClipItems = newLastClipItems;
       lastClipCount = 0;
-      logInfo(@"after restore");
+      // logInfo(@"after restore");
     }
   } else if (lastTouchedCount != [pb changeCount]) {
     // NSLog(@"@NEW clipboard?");
@@ -194,6 +198,7 @@ static CGEventRef mouseCallback(CGEventTapProxy proxy, CGEventType type,
       [lastClipItems release];
     }
     lastClipItems = copy_paste_items([pb pasteboardItems]);
+    logInfo(@"Detected new clipboard");
   }
 
   switch (type) {
@@ -209,6 +214,7 @@ static CGEventRef mouseCallback(CGEventTapProxy proxy, CGEventType type,
     break;
 
   case kCGEventKeyDown:
+ // NSLog(@"EVENT key: %lld (%lld)", CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode), CGEventGetFlags(event));
     if (CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode) ==
             kVK_ANSI_V &&
         (CGEventGetFlags(event) & kCGEventFlagMaskCommand)) {
