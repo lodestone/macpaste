@@ -87,42 +87,41 @@ static void paste(CGEventRef event) {
       return isDoubleClickSpeed();
     }
 
-    static CGEventRef mouseCallback (
-      CGEventTapProxy proxy,
-      CGEventType type,
-      CGEventRef event,
-      void * refcon
-    ) {
-      int* dontpaste = refcon;
-      switch ( type )
-      {
-        case kCGEventOtherMouseDown:
-        if (*dontpaste == 0)
-        paste( event );
-        break;
-
-        case kCGEventLeftMouseDown:
-        recordClickTime();
-        break;
-
-        case kCGEventLeftMouseUp:
-        if ( isDoubleClick() || isDragging ) {
-          copy();
-        }
-        isDragging = 0;
-        break;
-
-        case kCGEventLeftMouseDragged:
-        isDragging = 1;
-        break;
-
-        default:
-        break;
+static CGEventRef mouseCallback (
+  CGEventTapProxy proxy,
+  CGEventType type,
+  CGEventRef event,
+  void * refcon
+) {
+  int* dontpaste = refcon;
+  switch (type) {
+    case kCGEventLeftMouseDown:
+      recordClickTime();
+      // Paste on a single left-click (if it's not a double-click or dragging).
+      if (*dontpaste == 0 && !isDoubleClick() && !isDragging) {
+        paste(event);
       }
+      break;
 
-      // Pass on the event, we must not modify it anyway, we are a listener
-      return event;
-    }
+    case kCGEventLeftMouseUp:
+      // Trigger copy only if it's a double-click or dragging event.
+      if (isDoubleClick() || isDragging) {
+        copy();
+      }
+      isDragging = 0;
+      break;
+
+    case kCGEventLeftMouseDragged:
+      isDragging = 1;
+      break;
+
+    default:
+      break;
+  }
+
+  // Pass on the event, we must not modify it anyway, we are a listener.
+  return event;
+}
 
     int main (
       int argc,
